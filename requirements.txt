@@ -1,1 +1,2 @@
 requests>=2.28
+azure-ai-projects==1.1.0b4
