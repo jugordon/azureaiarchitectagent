@@ -1,0 +1,90 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Azure Retail Prices API",
+    "version": "1.0.0",
+    "description": "API for retrieving Azure retail prices, filtered by service name. This API is public and does not require authentication."
+  },
+  "servers": [
+    {
+      "url": "https://prices.azure.com/api"
+    }
+  ],
+  "paths": {
+    "/retail/prices": {
+      "get": {
+        "summary": "Get retail prices",
+        "operationId": "GetAzurePricing",
+        "description": "Retrieve retail prices for Azure services. Supports OData filters.",
+        "parameters": [
+          {
+            "name": "$filter",
+            "in": "query",
+            "description": "OData filter expression, e.g., serviceName eq 'Cognitive Services'",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "serviceName eq 'Cognitive Services'"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "BillingCurrency": { "type": "string" },
+                    "CustomerEntityId": { "type": "string" },
+                    "CustomerEntityType": { "type": "string" },
+                    "Items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "currencyCode": { "type": "string" },
+                          "tierMinimumUnits": { "type": "number" },
+                          "retailPrice": { "type": "number" },
+                          "unitPrice": { "type": "number" },
+                          "armRegionName": { "type": "string" },
+                          "location": { "type": "string" },
+                          "effectiveStartDate": { "type": "string", "format": "date-time" },
+                          "meterId": { "type": "string" },
+                          "meterName": { "type": "string" },
+                          "productId": { "type": "string" },
+                          "skuId": { "type": "string" },
+                          "serviceName": { "type": "string" },
+                          "serviceId": { "type": "string" },
+                          "serviceFamily": { "type": "string" },
+                          "unitOfMeasure": { "type": "string" },
+                          "type": { "type": "string" },
+                          "isPrimaryMeterRegion": { "type": "boolean" },
+                          "armSkuName": { "type": "string" }
+                        }
+                      }
+                    },
+                    "NextPageLink": { "type": "string" },
+                    "Count": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "NoAuth": {
+        "type": "http",
+        "scheme": "none",
+        "description": "This API is public and does not require authentication."
+      }
+    }
+  },
+  "security": []
+}
