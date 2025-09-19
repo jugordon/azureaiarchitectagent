@@ -56,7 +56,7 @@ with AIProjectClient(
 
     # Initialize the main OpenAPI tool definition for weather
     openapi_tool = OpenApiTool(
-        name="get_weather", spec=azure_cost_management_spec, description="Allow to get the pricing of Azure services", auth=auth
+        name="get_azure_prices", spec=azure_cost_management_spec, description="Open API tool that use Azure Retail Prices API to get the pricing of Azure services", auth=auth
     )
 
     # </countries_tool_setup>
@@ -66,7 +66,7 @@ with AIProjectClient(
     # Create an agent configured with the combined OpenAPI tool definitions
     agent = project_client.agents.create_agent(
         model=model_deployment_name, # Specify the model deployment
-        name="agenteCostos", # Give the agent a name
+        name="AI Cost Analyst", # Give the agent a name
         instructions="""You are an Azure Retail Pricing Specialist. Use the Azure Retail Prices API (GET https://prices.azure.com/api/retail/prices) to fetch retail prices. When Savings Plans/preview features are relevant, use api-version=2023-01-01-preview. Always:
 
             Normalize user inputs into a bill‑of‑inputs (service, region, priceType, quantity, tier, redundancy).
@@ -98,7 +98,7 @@ with AIProjectClient(
     message = project_client.agents.messages.create(
         thread_id=thread.id,
         role="user",
-        content="Cual es el precio del servicio de Azure OpenAI en la region East US?",
+        content="Cual es el precio del servicio de Azure AI Search Standard S1 en la region East US?",
     )
     print(f"Created message, ID: {message.id}")
     # </thread_management>
@@ -117,35 +117,32 @@ with AIProjectClient(
         print(f"Run failed: {run.last_error}")
 
     # Retrieve the steps taken during the run for analysis
-    run_steps = project_client.agents.runs_steps.list(thread_id=thread.id, run_id=run.id)
+    run_steps = project_client.agents.run_steps.list(thread_id=thread.id, run_id=run.id)
 
-    # Loop through each step to display information
-    for step in run_steps.data:
+     # Loop through each step to display information
+    for step in run_steps:
         print(f"Step {step['id']} status: {step['status']}")
 
-        # Check if there are tool calls recorded in the step details
-        step_details = step.get("step_details", {})
-        tool_calls = step_details.get("tool_calls", [])
+        tool_calls = step.get("step_details", {}).get("tool_calls", [])
+        for call in tool_calls:
+            print(f"  Tool Call ID: {call.get('id')}")
+            print(f"  Type: {call.get('type')}")
+            function_details = call.get("function", {})
+            if function_details:
+                print(f"  Function name: {function_details.get('name')}")
+                print(f" function output: {function_details.get('output')}")
 
-        if tool_calls:
-            print("  Tool calls:")
-            for call in tool_calls:
-                print(f"    Tool Call ID: {call.get('id')}")
-                print(f"    Type: {call.get('type')}")
-
-                function_details = call.get("function", {})
-                if function_details:
-                    print(f"    Function name: {function_details.get('name')}")
-        print() # Add an extra newline between steps for readability
+        print()
     # </tool_execution_loop>
 
     # <cleanup>
     # --- Cleanup ---
+
     # Delete the agent resource to clean up
-    project_client.agents.delete_agent(agent.id)
+    #project_client.agents.delete_agent(agent.id)
     print("Deleted agent")
 
     # Fetch and log all messages exchanged during the conversation thread
     messages = project_client.agents.messages.list(thread_id=thread.id)
-    print(f"Messages: {messages}")
-    # </cleanup>
+    for msg in messages:
+        print(f"Message ID: {msg.id}, Role: {msg.role}, Content: {msg.content}")
