@@ -42,13 +42,13 @@ def run_agent(user_input, thread_id, agent_id):
 #Setup the Connected Agent Tools
 # Get the agent by its ID
 waf_ai_agent = project_client.agents.get_agent("asst_Gfk7LgFKGIC9JsHqaIl7r9GP")
-architecture_review_agent = project_client.agents.get_agent("asst_Gfk7LgFKGIC9JsHqaIl7r9GP")
-reference_architecture_agent = project_client.agents.get_agent("asst_by5D8yYV4QTI7wAXoiSPirMC")
+architecture_review_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
+reference_architecture_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
 bicep_agent = project_client.agents.get_agent("asst_Gfk7LgFKGIC9JsHqaIl7r9GP")
 costs_agent = project_client.agents.get_agent("asst_yPQUnAV3aygKdzZxI1X4y1J0")
 
 waf_connected_agent = ConnectedAgentTool(
-        id=waf_ai_agent.id, name="get_waf_info", description="Searches for information about WAF."
+        id=waf_ai_agent.id, name="get_waf_info", description="Searches for information about well architected framework."
     )
 architecture_review_connected_agent = ConnectedAgentTool(
         id=architecture_review_agent.id, name="get_architecture_review", description="Retrieves architecture review information."
@@ -99,5 +99,5 @@ thread = project_client.agents.threads.create()
 print(f"Created thread, ID: {thread.id}")
 
 # Example user input for the agent
-user_input = "What is the weather in Paris?"  # Example user input
+user_input = "I need to implement an architecture in which AI can assist with customer support, the architecture should include a chatbot and a knowledge base based on a call center"  # Example user input
 run_agent(user_input, thread_id=thread.id, agent_id=agent.id)  # Run the agent with the user input

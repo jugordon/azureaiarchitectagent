@@ -1,2 +1,9 @@
 requests>=2.28
 azure-ai-projects==1.1.0b4
+pandas
+python-dotenv
+sqlalchemy
+psycopg2-binary
+azure-identity 
+opentelemetry-sdk 
+azure-monitor-opentelemetry
