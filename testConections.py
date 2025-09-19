@@ -13,3 +13,5 @@ AZURE_PG_CONNECTION="postgresql://aiagentpostgresql.postgres.database.azure.com:
 
 
 db = create_engine(AZURE_PG_CONNECTION)
+
+print ("hola")

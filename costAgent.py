@@ -67,6 +67,7 @@ with AIProjectClient(
     agent = project_client.agents.create_agent(
         model=model_deployment_name, # Specify the model deployment
         name="AI Cost Analyst", # Give the agent a name
+        description="Agent that provides Azure pricing information using the Azure Retail Prices API", # Describe the agent's purpose
         instructions="""You are an Azure Retail Pricing Specialist. Use the Azure Retail Prices API (GET https://prices.azure.com/api/retail/prices) to fetch retail prices. When Savings Plans/preview features are relevant, use api-version=2023-01-01-preview. Always:
 
             Normalize user inputs into a bill‑of‑inputs (service, region, priceType, quantity, tier, redundancy).

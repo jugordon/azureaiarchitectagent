@@ -41,15 +41,13 @@ def run_agent(user_input, thread_id, agent_id):
 
 #Setup the Connected Agent Tools
 # Get the agent by its ID
-waf_ai_agent = project_client.agents.get_agent("asst_Gfk7LgFKGIC9JsHqaIl7r9GP")
-architecture_review_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
+architecture_review_agent = project_client.agents.get_agent("asst_QpmjKNS10VsYWbOb0D8M1cbt")
 reference_architecture_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
-bicep_agent = project_client.agents.get_agent("asst_Gfk7LgFKGIC9JsHqaIl7r9GP")
-costs_agent = project_client.agents.get_agent("asst_yPQUnAV3aygKdzZxI1X4y1J0")
+bicep_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
+costs_agent = project_client.agents.get_agent("asst_iNrMDxVNfx9QtULlAPMJVBi7")
+success_stories_agent = project_client.agents.get_agent("asst_BYTvywblBSlbLFLPrdKBPxHa")
 
-waf_connected_agent = ConnectedAgentTool(
-        id=waf_ai_agent.id, name="get_waf_info", description="Searches for information about well architected framework."
-    )
+
 architecture_review_connected_agent = ConnectedAgentTool(
         id=architecture_review_agent.id, name="get_architecture_review", description="Retrieves architecture review information."
     )
@@ -62,34 +60,73 @@ bicep_connected_agent = ConnectedAgentTool(
 costs_connected_agent = ConnectedAgentTool(
         id=costs_agent.id, name="get_cost_estimates", description="Provides cost estimates for Azure resources."
     )
+success_stories_connected_agent = ConnectedAgentTool(
+        id=success_stories_agent.id, name="get_success_stories", description="Retrieves success stories of AI implementations in Azure."
+    )
 
 
 # Create the Connected Agent
 agent = project_client.agents.create_agent(
     model=os.getenv("AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME"),  # Model deployment name
-    name="architecture-ai-agent",  # Name of the agent
+    name="Master Architecture Ai Agent",  # Name of the agent
     instructions="""
-    You are an agent that coordinates Azure AI architecture tasks.
-    Do not answer questions on your own.
-    Your role is to be an orchestrator who will call the appropriate functions provided to you.
-    Each function you have available is an agent that can accomplish a specific task.
-        
-        Here are descriptions of the tools you have available:
-            - WAF Agent: An agent that provides information about the Azure Well-Architected Framework.
-            - Architecture Review Agent: An agent that analyzes an existing architecture image and provides feedback based on the Azure Well-Architected Framework for AI and official Azure reference architectures.
-            - Reference Architecture Agent: An agent that retrieves reference architecture information.
-            - Bicep Agent: An agent that generates a parameterized Bicep deployment template based on the architecture image.
-            - Costs Agent: An agent that produces a cost calculator based on the architecture image, considering SKUs, usage, and regional pricing.
+    # System — Azure AI Architecture Orchestrator (Persona‑Aware)
 
+    You are the **Orchestrator**. **Do not** answer on your own. Your job is to:
+    1) classify the user into one of four personas,
+    2) design a plan,
+    3) invoke the right specialized agents,
+    4) merge their outputs, and
+    5) return one unified, structured response.
 
-        Use the tools to gather information and provide a comprehensive response to the user.
-        If you are unable to answer the question, please respond with "I don't know".
+    ## Personas
+    - **A. No architecture (business need/idea only)**
+    - **B. Existing architecture (image or description)**
+    - **C. Cost-only** for a current architecture
+    - **D. Bicep-only** for a current architecture
+
+    ## Agents you can call
+    - **Architecture Review Agent** — WAF review of diagrams/images; cite Azure references.
+    - **Reference Architecture Agent** — suggest reference architectures; explain fit.
+    - **Bicep Agent** — parameterized, modular Bicep (+ *.bicepparam, what-if guidance).
+    - **Costs Agent** — Azure Retail Prices API with pagination; log all queries/filters; assumptions.
+    - **Success Stories Agent** — relevant customer stories (industry/scale/region).
+
+    ## Clarification Policy (ask ONCE)
+    If region/market/critical usage is missing continue with defaults and log impacts:
+    - **Market/Currency:** USD
+    - **Region:** eastus
+    - **Storage defaults:** Hot + LRS, ops/egress=0 initial
+
+    ## Routing
+    - **A (No architecture):** Reference → Bicep → Costs → Success (→ optional Review)
+    - **B (Existing architecture):** Parallel Review + Bicep + Costs → then Reference → Success
+    - **C (Cost-only):** Costs only
+    - **D (Bicep-only):** Bicep only (→ optional Review)
+
+    ## Guardrails
+    - Organize all findings by **Well‑Architected pillars**; state trade-offs.
+    - Enforce **Responsible Agentic AI**: audit trails, RBAC, circuit breakers, data boundary controls.
+    - **Costs Agent** must use Retail Prices API with `NextPageLink` pagination and provide all URLs.
+    - **Bicep Agent** must output modular, parameterized templates; no secrets; what-if/lint guidance.
+
+    ## Output Contract (always return)
+    1) An **Executive Summary** (≤10 bullets).
+    2) A **JSON** object with:
+    - `summary`, `assumptions`, `openQuestions`
+    - `wellArchitected` (5 pillars: risks + recs)
+    - `referenceArchitectures` (title, whyRelevant, link)
+    - `bicep` (modules, parameters, notes)
+    - `costs` (market, region, lineItems with source IDs + apiQuery, totalMonthly, missingDetails)
+    - `successStories` (customer, industry, outcome, link)
+
+    If any agent yields insufficient data, report attempts (filters/queries/criteria) and return partial results with a note. If something cannot be determined, reply “I don’t know”.
     """,  # Instructions for the agent
-    tools=waf_connected_agent.definitions 
-    + architecture_review_connected_agent.definitions 
+    tools=architecture_review_connected_agent.definitions 
     + reference_architecture_connected_agent.definitions 
     + bicep_connected_agent.definitions 
-    + costs_connected_agent.definitions,  # Tools available to the agent
+    + costs_connected_agent.definitions
+    + success_stories_connected_agent.definitions,  # Tools available to the agent
 )
 print(f"Created agent, ID: {agent.id}")
 

@@ -1,4 +1,4 @@
-
+# %%
 import os
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
@@ -25,9 +25,11 @@ functions = FunctionTool(user_functions)
 toolset = ToolSet()
 toolset.add(functions)
 
+project_client.agents.enable_auto_function_calls(toolset)
+
 agent = project_client.agents.create_agent(
     model= os.getenv("AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME"), 
-    name=f"success-stories-agent-{datetime.now().strftime('%Y%m%d%H%M')}",
+    name=f"Success stories agent",
     description="Success stories expert Agent", 
     instructions=f"""
     You are an expert Azure architect specialized in artificial intelligence solutions. Your role is to receive a business requirement and determine if there is any success story that can be helpful to provide information,
@@ -39,35 +41,33 @@ agent = project_client.agents.create_agent(
 )
 print(f"Created agent, ID: {agent.id}")
 
-# Create thread for communication
+# Create a thread for communication
 thread = project_client.agents.threads.create()
 print(f"Created thread, ID: {thread.id}")
 
-# Create message to thread
+# Create a message to thread
 message = project_client.agents.messages.create(
     thread_id=thread.id,
     role="user",
-    content="""
-    I need to build an AI solution for a call center, I need to be able to perform knowledge mining and be able to answer questions about it, can you provide me with any success stories that could be helpful?
-    """,
+    content="I need to build an AI solution for a call center, I need to be able to perform knowledge mining and be able to answer questions about it, can you provide me with any success stories that could be helpful?",
 )
+
 print(f"Created message, ID: {message.id}")
 
 
 
-# Create and process agent run in thread with tools
-run = project_client.agents.runs.create(thread_id=thread.id, agent_id=agent.id)
-print(f"Created run, ID: {run.id}")
+from pprint import pprint
 
-if run.status == "failed":
-    print(f"Run failed: {run.last_error}")
+# Create and process an agent run in the thread with tools
+run = project_client.agents.runs.create_and_process(thread_id=thread.id, agent_id=agent.id)
+print(f"Run finished with status: {run.status}")
 
-# Fetch and log all messages from the thread
+# Fetch and log all messages exchanged during the conversation thread
 messages = project_client.agents.messages.list(thread_id=thread.id)
-for message in messages:
-    print(f"Role: {message['role']}, Content: {message['content']}")
+for msg in messages:
+    print(f"Message ID: {msg.id}, Role: {msg.role}, Content: {msg.content}")
 
 # Delete the agent after use
-#project_client.agents.delete_agent(agent.id)
+#project_client.agents.delete_agent(agent.id)   
 print("Deleted agent")
 
