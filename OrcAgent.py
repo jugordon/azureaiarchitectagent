@@ -43,9 +43,9 @@ def run_agent(user_input, thread_id, agent_id):
 # Get the agent by its ID
 architecture_review_agent = project_client.agents.get_agent("asst_QpmjKNS10VsYWbOb0D8M1cbt")
 reference_architecture_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
-bicep_agent = project_client.agents.get_agent("asst_lBTWM8vMKkwSsZ88it7iFTC8")
-costs_agent = project_client.agents.get_agent("asst_iNrMDxVNfx9QtULlAPMJVBi7")
-success_stories_agent = project_client.agents.get_agent("asst_BYTvywblBSlbLFLPrdKBPxHa")
+bicep_agent = project_client.agents.get_agent("asst_T5qe1uAVveKDOhifF9zoGXKI")
+costs_agent = project_client.agents.get_agent("asst_row9gRIIQBpCbj5CRT9tXwD5")
+success_stories_agent = project_client.agents.get_agent("asst_OCAmFwPtvijf5HToarJWbli1")
 
 
 architecture_review_connected_agent = ConnectedAgentTool(
@@ -114,11 +114,11 @@ agent = project_client.agents.create_agent(
     1) An **Executive Summary** (≤10 bullets).
     2) A **JSON** object with:
     - `summary`, `assumptions`, `openQuestions`
-    - `wellArchitected` (5 pillars: risks + recs)
-    - `referenceArchitectures` (title, whyRelevant, link)
+    - `architectureReview` (pillar, question, status, findings, references)
+    - `referenceArchitectures` (title, summary, URL)
     - `bicep` (modules, parameters, notes)
     - `costs` (market, region, lineItems with source IDs + apiQuery, totalMonthly, missingDetails)
-    - `successStories` (customer, industry, outcome, link)
+    - `successStories` (business goal, Key Products, technology solution, impact)
 
     If any agent yields insufficient data, report attempts (filters/queries/criteria) and return partial results with a note. If something cannot be determined, reply “I don’t know”.
     """,  # Instructions for the agent

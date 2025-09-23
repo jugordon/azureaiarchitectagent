@@ -64,24 +64,24 @@ async def main(message: cl.Message):
 async def set_starters():
     return [
         cl.Starter(
-            label="Paris Weather",
-            message="What's the weather like in Paris today?",
-            icon="/public/weather.svg",
+            label="Blob storage price",
+            message="What is the price of Blob storage in Azure?",
+            icon="/public/Picture2.png",
             ),
 
         cl.Starter(
-            label="Paris Itinerary",
-            message="Help me plan a day in Paris based on the weather. What are the must-see attractions?",
-            icon="/public/airplane.svg",
+            label="I want to implement a RAG project",
+            message="Help me with a Retrieval-Augmented Generation (RAG) project.",
+            icon="/public/Picture3.png",
             ),
         cl.Starter(
             label="Suitcase Shopping",
             message="Provide me a list of suitcases for my trip to Paris.",
-            icon="/public/suitcase.svg",
+            icon="/public/Picture4.png",
             ),
         cl.Starter(
             label="Restaurant Recommendations",
             message="Provide me 3 restaurants in Paris that have great pizza.",
-            icon="/public/food.svg",
+            icon="/public/Picture5.png",
             )
         ]

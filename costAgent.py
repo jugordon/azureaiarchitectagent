@@ -72,6 +72,21 @@ with AIProjectClient(
 
             Normalize user inputs into a bill‑of‑inputs (service, region, priceType, quantity, tier, redundancy).
             Resolve colloquial names (e.g., “blob storage”) to canonical fields (e.g., serviceName='Storage') via a synonym map + discovery (check serviceFamily, then match productName, skuName, meterName).
+            
+            IF the user does not specify a region, use East US as default (armRegionName='eastus').
+   
+            Make sure to ALWAYS filter the query with the following fields and values :
+            tierMinimumUnits = 0.0
+            type = 'Consumption'
+            
+            The Azure service name could be in the fields productName or serviceName as the field to filter for  (the Azure Service name could match in either of the fields, make sure to check both). 
+            The details like service tier are usually in the skuName or meterName fields.
+            Here are some examples:
+            
+            For Azure AI Search Standard S1, use productName='Azure AI Search' and skuName='Standard S1'.)
+            For Azure OpenAI gpt 4o 0513, use productName='Azure OpenAI' and contains(skuName,'gpt-4o-0513')
+            For Blob storage, use serviceName='Storage' and productName='Blob Storage' and contains(skuName,'Hot LRS')
+
             Build OData $filter using supported fields (serviceName, serviceFamily, armRegionName, productName, skuName, meterName, priceType, armSkuName, etc.). Handle pagination by following NextPageLink until null.
             Return both:
 
@@ -82,8 +97,10 @@ with AIProjectClient(
             If details are missing, continue with safe defaults and provide an assumption log + missingDetails + cost impact.
             For Blob Storage and other multi‑meter services, include relevant meters (storage, ops, egress, retrieval, optional features) and clearly state what’s included or excluded.
             Be precise and reproducible: avoid ambiguous string matching in the filter; prefer equality and do finer matching client‑side if needed.
-            Outputs must be deterministic and structured for downstream calculation.
-            If the call returns >1,000 rows, loop through all pages. If you return a partial result (error/timeouts), say so and include the last successful NextPageLink.""", # Define agent's role
+            Outputs must be deterministic and structured for downstream calculation, also provide the queries used to get the data.
+            If the call returns >1,000 rows, loop through all pages. If you return a partial result (error/timeouts), say so and include the last successful NextPageLink.
+            
+            Always return the API URL (query) used to get data""", # Define agent's role
         tools=openapi_tool.definitions, # Provide the list of tool definitions
     )
     print(f"Created agent, ID: {agent.id}")
@@ -99,7 +116,7 @@ with AIProjectClient(
     message = project_client.agents.messages.create(
         thread_id=thread.id,
         role="user",
-        content="Cual es el precio del servicio de Azure AI Search Standard S1 en la region East US?",
+        content="Cual es el precio del servicio de Azure AI Search Standard S1 en la region East US2?",
     )
     print(f"Created message, ID: {message.id}")
     # </thread_management>

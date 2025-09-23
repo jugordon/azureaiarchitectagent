@@ -68,6 +68,6 @@ for msg in messages:
     print(f"Message ID: {msg.id}, Role: {msg.role}, Content: {msg.content}")
 
 # Delete the agent after use
-#project_client.agents.delete_agent(agent.id)   
+project_client.agents.delete_agent(agent.id)   
 print("Deleted agent")
 
